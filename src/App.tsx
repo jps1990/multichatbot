@@ -10,14 +10,36 @@ import { handleKeyboardShortcuts } from './utils/keyboardShortcuts';
 import { handleApiCall, generateImage } from './utils/apiHelpers';
 import { createMessage } from './utils/messageHandlers';
 
-const models = {
-  openai: ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-vision-preview'],
-  anthropic: ['claude-v1', 'claude-2', 'claude-instant-v1'],
-  cohere: ['command', 'command-light', 'command-nightly', 'command-r-plus', 'command-r']
+export const models = {
+  openai: [
+    'gpt-4o',
+    'gpt-4-turbo',
+    'gpt-4',
+    'gpt-3.5-turbo',
+    'dall-e-3',
+    'dall-e-2'
+  ],
+  anthropic: [
+    'claude-3.5-sonnet-20241022',
+    'claude-3.5-haiku-20241022',
+    'claude-3-opus-20240229',
+    'claude-3-sonnet-20240229',
+    'claude-3-haiku-20240307'
+  ],
+  cohere: [
+    'command-r-plus-04-2024',
+    'command-r-08-2024',
+    'command',
+    'command-light',
+    'command-nightly'
+  ]
 };
 
 function App() {
-  const [conversations, setConversations] = useState<Conversation[]>([{ id: Date.now(), messages: [] }]);
+  const [conversations, setConversations] = useState<Conversation[]>([{
+    id: Date.now(), messages: [],
+    title: ''
+  }]);
   const [currentConversationIndex, setCurrentConversationIndex] = useState(0);
   const [input, setInput] = useState('');
   const [apiKeys, setApiKeys] = useState<ApiKeys>({
@@ -167,7 +189,11 @@ function App() {
   };
 
   const createNewConversation = () => {
-    const newConversation: Conversation = { id: Date.now(), messages: [] };
+    const newConversation: Conversation = {
+      id: Date.now(),
+      title: `Conversation ${conversations.length + 1}`,
+      messages: []
+    };
     setConversations([...conversations, newConversation]);
     setCurrentConversationIndex(conversations.length);
   };
@@ -178,6 +204,13 @@ function App() {
     if (currentConversationIndex >= updatedConversations.length) {
       setCurrentConversationIndex(Math.max(0, updatedConversations.length - 1));
     }
+  };
+
+  const updateConversationTitle = (index: number, newTitle: string) => {
+    const updatedConversations = conversations.map((conv, i) => 
+      i === index ? { ...conv, title: newTitle } : conv
+    );
+    setConversations(updatedConversations);
   };
 
   useEffect(() => {
@@ -241,6 +274,7 @@ function App() {
             onSelect={setCurrentConversationIndex}
             onNew={createNewConversation}
             onDelete={deleteConversation}
+            onUpdateTitle={updateConversationTitle}
           />
           <div className="flex-grow flex flex-col">
             <div className="flex-grow overflow-auto p-4 space-y-4">
